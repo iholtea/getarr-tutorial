@@ -95,18 +95,30 @@ CREATE TABLE IF NOT EXISTS verify_mfa (
 	FOREIGN KEY (user_id) REFERENCES app_user (user_id) ON DELETE CASCADE,
 	
 	CONSTRAINT UQ_Mfa_Code UNIQUE (mfa_code),
-	CONSTRAINT UQ_Reset_Pass_User_Id UNIQUE (user_id)
+	CONSTRAINT UQ_Verify_Mfa_User_Id UNIQUE (user_id)
 
 );
 
 insert into app_user(first_name, last_name, email) 
-values( 'pop', 'popescu', 'ppopescu@gmail.com');
+values ('pop', 'popescu', 'ppopescu@gmail.com');
 
 insert into app_user(first_name, last_name, email) 
-values( 'gigi', 'gigescu', 'ggicescu@outlook.com');
+values ('gigi', 'gigescu', 'ggicescu@outlook.com');
 
 insert into user_event(user_id, event_type, description)
-values(1, 'LOGIN_SUCCESS', 'login from ip 10.0.0.10 using chrome');
+values (1, 'LOGIN_SUCCESS', 'login from ip 10.0.0.10 using chrome');
 
 insert into user_event(user_id, event_type, description)
-values(1, 'LOGOUT', 'logout from ip 10.0.0.10 using chrome');
+values (1, 'LOGOUT', 'logout from ip 10.0.0.10 using chrome');
+
+insert into app_role (role_name, permissions)
+values ('ROLE_USER', 'READ:USER,READ:CUSTOMER');
+
+insert into app_role (role_name, permissions)
+values ('ROLE_MANAGER', 'READ:USER,READ:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER');
+
+insert into app_role (role_name, permissions)
+values ('ROLE_ADMIN', 'READ:USER,READ:CUSTOMER,CREATE:USER,CREATE:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER');
+
+insert into app_role (role_name, permissions)
+values ('ROLE_SYSADMIN', 'READ:USER,READ:CUSTOMER,CREATE:USER,CREATE:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER,DELETE:USER,DELETE:CUSTOMER');
