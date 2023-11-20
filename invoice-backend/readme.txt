@@ -9,6 +9,12 @@ Flyway
 	
 Access the H2 database: http://localhost:8080/h2-console/
 
+After authentication to h2-console it sends a session_id
+http://localhost:8080/h2-console/login.do?jsessionid=88aa7391f6eaf7ddb76fcd78e0062576
+(this might or might not have stuff to do with spring security and allowing
+access to h2-console by allowing/excepting it from security rules of the application
+as the h2-console is a sub-domain of our application) 
+
 
 NamedParameterJdbcTemplate usage
 
@@ -72,7 +78,21 @@ How to completely disable Spring security
 		
 	2.	exclude it from application.properties
 		spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;	
-		
+
+
+Validation :
+	
+	in our domain/model classes we have:
+	@NotEmpty(message = "First name cannot be empty")
+	private String firstName;
+	
+	The in our API resource if we use @Valid on the AppUser object
+	@PostMapping("/register")
+	public ResponseEntity<AppUser> saveUser(@RequestBody @Valid AppUser appUser) {
+	
+	If the firstName of the the AppUser created by Spring from the POST data
+	would be empty, some exception would be thrown.		
+
 
 How to fix exception: InvalidDataAccessApiUsageException - The current key entry contains multiple keys 
 
@@ -96,6 +116,79 @@ How to fix exception: InvalidDataAccessApiUsageException - The current key entry
 	    } else {
 	        newId= holder.getKey().longValue();
 	    }	
+	    
+	    
+Spring Security:
+	
+	Requests -> Security filters -> MVC/REST Controllers ( via DispatcherServlet )
+	
+	Adding the spring-security dependencies to the project classpath will trigger 
+	SprinBoot to auto-configure security filters to intercept requests.
+	
+	UsernamePasswordAuthenticationFileter ->
+		Authentication Manager( ProviderManager ) ->
+			Authentication Provider ( DaoAuthenticationProvider ) ->
+				User Details Service ( InMemoryUserDetailService )
+				
+To authorize a request we may use either a Token or a SesssionCookie and add it to each request.
+
+Spring Security Configuration - create a class
+
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig {
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+CSRF: Cross-Site Request Forgery
+	it seems to mean that an attacker sends you a link to access a site you are already
+	logged in. As such, the browser will attach the authentication cookie/token and the 
+	request will be successful. That request contains data ( HTTP GET since there's 
+	just a link ) to perform some action on the server that the attacker will benefit.
+	
+	// disables CSRF for all requests
+	http.csrf().disable()  
+	
+	// probably disables CSRF just for the /h2-console path
+	csrf.ignoringRequestMatchers(PathRequest.toH2Console()).disable()
+	
+CORS: Cross-origin resource sharing
+	is a mechanism for integrating applications. 
+	CORS defines a way for client web applications that are loaded in one domain 
+	to interact with resources in a different domain.
+	
+	// probably disables CORS protection, allowing access from all domains
+	http.cors().disable()				
+			
+Some stuff relate to h2-console application
+	
+	http.authorizeHttpRequests( auth -> 
+		//auth.requestMatchers(ALLOWED_URLS).permitAll()
+		auth.requestMatchers(PathRequest.toH2Console()).permitAll()
+	);
+	
+	Method requestMatcher() may get an array of String or RequestMatcher objects
+	requestMatchers(RequestMatcher... requestMatchers)
+	requestMatchers(String... patterns)		
+	
+	If we use the String[] method in conjunction with having h2-console I get an exception
+	More than one mappable servlet in your servlet context: 
+	{org.h2.server.web.JakartaWebServlet=[/h2-console/*], 
+	org.springframework.web.servlet.DispatcherServlet=[/]}.
+	
+	It suggests to use the RequestMatcher[] method.
+	
+	When doing so, after logging into the h2-console the content of the application
+	is not displayed - browser says localhost refused to connect
+	( what is in fact the h2-console app as it looks like a java applet ? )
+	
+	Adding this to SecurityConfiguration. TODO - what is this
+	http.headers( headers -> headers.frameOptions(FrameOptionsConfig::disable) );
+	
+	
+	
+	
+		    
 		
 	
 ///// Post request
