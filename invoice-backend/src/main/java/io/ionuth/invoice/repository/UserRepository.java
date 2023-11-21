@@ -13,4 +13,6 @@ public interface UserRepository {
 	AppUser update(AppUser appUser);
 	Boolean delete(Long id);
 	
+	AppUser getUserByEmail(String email);
+	
 }

@@ -3,9 +3,11 @@ package io.ionuth.invoice.repository.impl;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import io.ionuth.invoice.exception.ApiException;
 import io.ionuth.invoice.mapper.RoleRowMapper;
 import io.ionuth.invoice.model.AppRole;
 import io.ionuth.invoice.repository.RoleRepository;
@@ -19,6 +21,14 @@ public class RoleRepositoryJdbc implements RoleRepository {
 	
 	private final static String INSERT_ROLE_TO_USER_QUERY = """
 			INSERT INTO invoice.user_role (user_id, role_id) VALUES (:userId, :roleId)
+			""";
+	
+	private final static String SELECT_ROLE_BY_USER_EMAIL_QUERY = """
+			SELECT r.role_id, r.role_name, r.permissions, u.email 
+			FROM invoice.app_role r
+			INNER JOIN invoice.user_role ur ON r.role_id = ur.role_id 
+			INNER JOIN invoice.app_user u ON ur.user_id = u.user_id
+			WHERE u.email = :email
 			""";
 	
 	private final NamedParameterJdbcTemplate jdbcTmpl;
@@ -71,23 +81,22 @@ public class RoleRepositoryJdbc implements RoleRepository {
 	}
 
 	@Override
-	public AppRole getRoleByUserId(Long userId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public AppRole getRoleByUserEmail(String email) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return jdbcTmpl.queryForObject(SELECT_ROLE_BY_USER_EMAIL_QUERY, 
+					Map.of("email", email), new RoleRowMapper());
+		} catch(EmptyResultDataAccessException ex) {
+			throw new ApiException("No role found for user with email: " + email);
+		} catch(Exception ex) {
+			//TODO log error
+			throw new ApiException("An error has occurred. Please try again.");
+		}
 	}
 
 	@Override
 	public void updateUserRole(Long userId, String roleName) {
 		// TODO Auto-generated method stub
-		
 	}
-	
 	
 	
 }

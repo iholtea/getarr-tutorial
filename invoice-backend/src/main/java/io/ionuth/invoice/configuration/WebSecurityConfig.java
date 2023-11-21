@@ -20,6 +20,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import io.ionuth.invoice.handler.CustomAccessDeniedHandler;
 import io.ionuth.invoice.handler.CustomAuthenticationEntryPoint;
+import io.ionuth.invoice.service.imp.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -27,9 +28,22 @@ public class WebSecurityConfig {
 	
 	private static final RequestMatcher[] ALLOWED_URLS = {
 			PathRequest.toH2Console(),
-			AntPathRequestMatcher.antMatcher("/api/v1/users/login"),
-			AntPathRequestMatcher.antMatcher("/api/v1/test/login")
+			AntPathRequestMatcher.antMatcher("/error/**"),
+			AntPathRequestMatcher.antMatcher("/api/v1/users/login/**"),
+			AntPathRequestMatcher.antMatcher("/api/v1/users/register/**"),
+			AntPathRequestMatcher.antMatcher("/api/v1/test/login/**")
 	};
+	
+	private final CustomUserDetailsService userDetailService;
+	private final BCryptPasswordEncoder passEncoder;
+	
+	// constructor injection
+	public WebSecurityConfig(CustomUserDetailsService userDetailsService,
+			BCryptPasswordEncoder passEncoder) {
+		
+		this.userDetailService = userDetailsService;
+		this.passEncoder = passEncoder;
+	}
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,10 +61,12 @@ public class WebSecurityConfig {
 		
 		http.authorizeHttpRequests( auth -> {
 			auth.requestMatchers(ALLOWED_URLS).permitAll();
-			auth.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/v1/user/**"))
+			
+			auth.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/v1/users/**"))
 					.hasAnyAuthority("DELETE:USER");
-			auth.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/v1/customer/**"))
+			auth.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/v1/customers/**"))
 					.hasAnyAuthority("DELETE:CUSTOMER");
+			
 			// is this still necessary or is the default ?
 			auth.anyRequest().authenticated();
 		});
@@ -68,18 +84,12 @@ public class WebSecurityConfig {
 		return http.build();
 	}
 	
-	
 	@Bean
 	public AuthenticationManager authenticationManager() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setPasswordEncoder(passEncoder());
-		authProvider.setUserDetailsService(null);
+		authProvider.setPasswordEncoder(this.passEncoder);
+		authProvider.setUserDetailsService(this.userDetailService);
 		return new ProviderManager(authProvider);
-	}
-	
-	@Bean
-	public BCryptPasswordEncoder passEncoder() {
-		return new BCryptPasswordEncoder();
 	}
 	
 	@Bean

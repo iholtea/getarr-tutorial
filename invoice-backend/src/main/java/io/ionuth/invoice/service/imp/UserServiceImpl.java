@@ -20,5 +20,10 @@ public class UserServiceImpl implements UserService {
 	public AppUser createUser(AppUser appUser) {
 		return userRepo.create(appUser);
 	}
+	
+	@Override
+	public AppUser getUserByEmail(String email) {
+		return userRepo.getUserByEmail(email);
+	}
 
 }

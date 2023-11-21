@@ -1,6 +1,6 @@
 package io.ionuth.invoice.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -29,7 +29,7 @@ public class AppUser {
 	private boolean enabled;
 	private boolean locked;
 	private boolean useMfa;
-	private LocalDateTime createdDate;
+	private LocalDate createdDate;
 	
 	
 	
@@ -105,13 +105,11 @@ public class AppUser {
 	public void setUseMfa(boolean useMfa) {
 		this.useMfa = useMfa;
 	}
-	public LocalDateTime getCreatedDate() {
+	public LocalDate getCreatedDate() {
 		return createdDate;
 	}
-	public void setCreatedDate(LocalDateTime createdDate) {
+	public void setCreatedDate(LocalDate createdDate) {
 		this.createdDate = createdDate;
 	}
-	
-	
 	
 }

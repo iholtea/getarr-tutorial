@@ -99,11 +99,11 @@ CREATE TABLE IF NOT EXISTS verify_mfa (
 
 );
 
-insert into app_user(first_name, last_name, email) 
-values ('pop', 'popescu', 'ppopescu@gmail.com');
+insert into app_user(first_name, last_name, email, password, enabled) 
+values ('pop', 'popescu', 'ppopescu@gmail.com', '$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true);
 
-insert into app_user(first_name, last_name, email) 
-values ('gigi', 'gigescu', 'ggicescu@outlook.com');
+insert into app_user(first_name, last_name, email, password, enabled) 
+values ('gigi', 'gigescu', 'ggicescu@outlook.com', '$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true);
 
 insert into user_event(user_id, event_type, description)
 values (1, 'LOGIN_SUCCESS', 'login from ip 10.0.0.10 using chrome');
@@ -122,3 +122,6 @@ values ('ROLE_ADMIN', 'READ:USER,READ:CUSTOMER,CREATE:USER,CREATE:CUSTOMER,UPDAT
 
 insert into app_role (role_name, permissions)
 values ('ROLE_SYSADMIN', 'READ:USER,READ:CUSTOMER,CREATE:USER,CREATE:CUSTOMER,UPDATE:USER,UPDATE:CUSTOMER,DELETE:USER,DELETE:CUSTOMER');
+
+insert into user_role(user_id,role_id) values(1,1);
+insert into user_role(user_id,role_id) values(2,3);

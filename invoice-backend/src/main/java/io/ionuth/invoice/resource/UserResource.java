@@ -6,12 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import io.ionuth.invoice.data.LoginForm;
 import io.ionuth.invoice.model.AppUser;
 import io.ionuth.invoice.service.UserService;
 import jakarta.validation.Valid;
@@ -32,10 +34,18 @@ public class UserResource {
 	}
 	
 	@PostMapping("/login")
-	public String login(String email, String password) {
-		Authentication emailPass = new UsernamePasswordAuthenticationToken(email, password);
-		authenticationManager.authenticate(emailPass);
-		return "";
+	public ResponseEntity<AppUser> login(@RequestBody @Valid LoginForm loginForm) {
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+				loginForm.getEmail(), loginForm.getPassword());
+		// this will throw AuthenticationException if authentication fails
+		authenticationManager.authenticate(authentication);
+		AppUser appUser = userService.getUserByEmail(loginForm.getEmail());
+		return ResponseEntity.ok(appUser);
+	}
+	
+	@GetMapping("/login")
+	public ResponseEntity<String> loginGet() {
+		return ResponseEntity.ok("get works");
 	}
 	
 	@PostMapping("/register")

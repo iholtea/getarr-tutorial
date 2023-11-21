@@ -185,24 +185,37 @@ Some stuff relate to h2-console application
 	Adding this to SecurityConfiguration. TODO - what is this
 	http.headers( headers -> headers.frameOptions(FrameOptionsConfig::disable) );
 	
-	
-	
-	
-		    
+Note on error on cycles in dependency injection
+	Relying upon circular references is discouraged and they are prohibited by default. 
+	Update your application to remove the dependency cycle between beans. 
+	As a last resort, it may be possible to break the cycle automatically 
+	by setting spring.main.allow-circular-references to true.
+		
 		
 	
 ///// Post request
 
-http://localhost:8080/api/v1/users/register
+add user:
 
-{
-    "firstName": "Maria",
-    "lastName": "Marinescu",
-    "email": "mmarinesc@hotmail.com",
-    "password": "sinaia2000"
-}	
+	http://localhost:8080/api/v1/users/register
 
-pass: 90e8d637-0b1a-4193-9787-dd1a64d0cc02	 		
+	{
+	    "firstName": "Maria",
+	    "lastName": "Marinescu",
+	    "email": "mmarinescu@hotmail.com",
+	    "password": "123456"
+	}
+
+login:
+
+	http://localhost:8080/api/v1/users/login
+	
+	{
+    	"email": "ppopescu@gmail.com",
+    	"password": "123456"
+	}
+
+		
 
 
 	

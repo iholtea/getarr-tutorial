@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.ionuth.invoice.exception.ApiException;
+import io.ionuth.invoice.mapper.UserRowMapper;
 import io.ionuth.invoice.model.AppUser;
 import io.ionuth.invoice.model.RoleType;
 import io.ionuth.invoice.model.VerifyType;
@@ -30,6 +32,10 @@ public class UserRepositoryJdbc implements UserRepository {
 	
 	private static final String COUNT_EMAIL_QUERY = """
 			SELECT COUNT(*) FROM invoice.app_user WHERE email = :email
+			""";
+	
+	private static final String SELECT_USER_BY_EMAIL_QUERY = """
+			SELECT * FROM invoice.app_user WHERE email = :email
 			""";
 	
 	private static final String INSERT_VERIFY_ACCOUNT_QUERY = """
@@ -122,6 +128,20 @@ public class UserRepositoryJdbc implements UserRepository {
 	
 	/////////  other operations //////////////
 	
+	@Override
+	public AppUser getUserByEmail(String email) {
+		try {
+			return jdbcTmpl.queryForObject(SELECT_USER_BY_EMAIL_QUERY, 
+					Map.of("email", email), 
+					new UserRowMapper());
+		} catch(EmptyResultDataAccessException ex) {
+			throw new ApiException("No user found for email: " + email);
+		} catch(Exception ex) {
+			//TODO log error
+			throw new ApiException("An error has occurred. Please try again.");
+		}
+	}
+	
 	public boolean emailExists(String email) {
 		Integer count = jdbcTmpl.queryForObject(COUNT_EMAIL_QUERY, 
 				Map.of("email", email), 
@@ -138,13 +158,11 @@ public class UserRepositoryJdbc implements UserRepository {
 	}
 	
 	private String generateVerifyUrl(VerifyType verifyType) {
-		String relativePathStr = "/user/verify/" + 
+		String relativePathStr = "/api/v1/user/verify/" + 
 				verifyType.name().toLowerCase() + "/" + 
 				UUID.randomUUID().toString();
 		return ServletUriComponentsBuilder.fromCurrentContextPath()
 				.path(relativePathStr).toUriString();
-		 
-		
 	}
 	
 }
