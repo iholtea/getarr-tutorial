@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -18,9 +20,11 @@ import io.ionuth.invoice.exception.ApiException;
 import io.ionuth.invoice.mapper.UserRowMapper;
 import io.ionuth.invoice.model.AppUser;
 import io.ionuth.invoice.model.RoleType;
+import io.ionuth.invoice.model.VerifyData;
 import io.ionuth.invoice.model.VerifyType;
 import io.ionuth.invoice.repository.RoleRepository;
 import io.ionuth.invoice.repository.UserRepository;
+import io.ionuth.invoice.service.imp.CustomUserDetailsService;
 
 @Repository
 public class UserRepositoryJdbc implements UserRepository {
@@ -42,6 +46,17 @@ public class UserRepositoryJdbc implements UserRepository {
 			INSERT INTO invoice.verify_acct (user_id, verify_url)
 			VALUES (:userId, :verifyUrl)
 			""";
+	
+	private static final String DELETE_VERIFY_MFA_QUERY = """
+			DELETE FROM invoice.verify_mfa where user_id = :userId
+			""";
+	
+	private static final String INSERT_VERIFY_MFA_QUERY  = """
+			INSERT INTO invoice.verify_mfa (user_id, mfa_code, expiration_date)
+			VALUES (:userId, :mfaCode, :expirationDate) 
+			""";
+	
+	private Logger logger = LoggerFactory.getLogger(UserRepository.class);
 	
 	private final NamedParameterJdbcTemplate jdbcTmpl;
 	
@@ -137,8 +152,23 @@ public class UserRepositoryJdbc implements UserRepository {
 		} catch(EmptyResultDataAccessException ex) {
 			throw new ApiException("No user found for email: " + email);
 		} catch(Exception ex) {
-			//TODO log error
+			logger.error(ex.getMessage());
 			throw new ApiException("An error has occurred. Please try again.");
+		}
+	}
+	
+	@Override
+	public void addMfaVerifyCode(VerifyData verifyData) {
+		try {
+			jdbcTmpl.update(DELETE_VERIFY_MFA_QUERY, 
+					Map.of("userId", verifyData.getUserId()));
+			jdbcTmpl.update(INSERT_VERIFY_MFA_QUERY, Map.of(
+					"userId", verifyData.getUserId(),
+					"mfaCode", verifyData.getVerifyStr(),
+					"expirationDate", verifyData.getVerifyDate() ));
+		} catch(Exception ex) {
+			logger.error(ex.getMessage());
+			throw new ApiException("An error occured. Pleas try again");
 		}
 	}
 	

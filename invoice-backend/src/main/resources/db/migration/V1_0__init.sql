@@ -59,10 +59,10 @@ CREATE TABLE IF NOT EXISTS user_event (
 
 CREATE TABLE IF NOT EXISTS verify_acct (
 	
-	verify_id    IDENTITY PRIMARY KEY,
-	user_id      BIGINT NOT NULL,
-	verify_url   VARCHAR(255) NOT NULL,
-	created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	verify_id     IDENTITY PRIMARY KEY,
+	user_id       BIGINT NOT NULL,
+	verify_url    VARCHAR(255) NOT NULL,
+	created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	
 	FOREIGN KEY (user_id) REFERENCES app_user (user_id) ON DELETE CASCADE,
 	
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS verify_mfa (
 	
 	mfa_id           IDENTITY PRIMARY KEY,
 	user_id          BIGINT NOT NULL,
-	mfa_code         VARCHAR(10) NOT NULL,
+	mfa_code         CHAR(6) NOT NULL,
 	expiration_date  TIMESTAMP NOT NULL,
 	
 	FOREIGN KEY (user_id) REFERENCES app_user (user_id) ON DELETE CASCADE,
@@ -99,8 +99,9 @@ CREATE TABLE IF NOT EXISTS verify_mfa (
 
 );
 
-insert into app_user(first_name, last_name, email, password, enabled) 
-values ('pop', 'popescu', 'ppopescu@gmail.com', '$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true);
+insert into app_user(first_name, last_name, email, password, enabled, use_mfa) 
+values ('pop', 'popescu', 'ppopescu@gmail.com', 
+	'$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true, false);
 
 insert into app_user(first_name, last_name, email, password, enabled) 
 values ('gigi', 'gigescu', 'ggicescu@outlook.com', '$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true);

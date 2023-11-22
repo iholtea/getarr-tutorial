@@ -14,7 +14,7 @@ import io.ionuth.invoice.repository.RoleRepository;
 import io.ionuth.invoice.repository.UserRepository;
 
 /*
- * or we could implement the UserDetailsService in the UserServiceImpl
+ * or we could implement the UserDetailsService interface in the UserServiceImpl
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

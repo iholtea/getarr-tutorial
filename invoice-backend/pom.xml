@@ -21,6 +21,7 @@
 	</properties>
 	
 	<dependencies>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
@@ -52,6 +53,22 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		
+		<dependency>
+    		<groupId>com.auth0</groupId>
+    		<artifactId>java-jwt</artifactId>
+    		<version>4.4.0</version>
+		</dependency>
+
+		
+		<!-- It seems we already have apache.commons as a transitive dependency -->
+		<!--
+		<dependency>
+    		<groupId>org.apache.commons</groupId>
+    		<artifactId>commons-lang3</artifactId>
+    		<version>3.13.0</version>
+		</dependency>
+		-->
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
