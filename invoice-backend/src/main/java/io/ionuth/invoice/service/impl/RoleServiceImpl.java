@@ -1,4 +1,4 @@
-package io.ionuth.invoice.service.imp;
+package io.ionuth.invoice.service.impl;
 
 import org.springframework.stereotype.Service;
 

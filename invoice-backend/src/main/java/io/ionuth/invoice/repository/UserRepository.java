@@ -3,6 +3,7 @@ package io.ionuth.invoice.repository;
 import java.util.Collection;
 
 import io.ionuth.invoice.model.AppUser;
+import io.ionuth.invoice.model.UserVerify;
 import io.ionuth.invoice.model.VerifyData;
 
 public interface UserRepository {
@@ -16,6 +17,11 @@ public interface UserRepository {
 	
 	AppUser getUserByEmail(String email);
 	
-	void addMfaVerifyCode(VerifyData verifyData);
+	void addVerifyMfaCode(VerifyData verifyData);
+	
+	UserVerify verifyMfaCode(String email, String code);
+	
+	void deteleMfaCodeByUserId(long userId);
+	
 	
 }

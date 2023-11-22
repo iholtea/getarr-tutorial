@@ -32,7 +32,6 @@ public class AppUser {
 	private LocalDate createdDate;
 	
 	
-	
 	public Long getUserId() {
 		return userId;
 	}

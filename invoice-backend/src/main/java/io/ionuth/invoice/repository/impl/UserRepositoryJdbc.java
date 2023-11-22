@@ -18,13 +18,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.ionuth.invoice.exception.ApiException;
 import io.ionuth.invoice.mapper.UserRowMapper;
+import io.ionuth.invoice.mapper.UserVerifyRowMapper;
 import io.ionuth.invoice.model.AppUser;
 import io.ionuth.invoice.model.RoleType;
+import io.ionuth.invoice.model.UserVerify;
 import io.ionuth.invoice.model.VerifyData;
 import io.ionuth.invoice.model.VerifyType;
 import io.ionuth.invoice.repository.RoleRepository;
 import io.ionuth.invoice.repository.UserRepository;
-import io.ionuth.invoice.service.imp.CustomUserDetailsService;
+import io.ionuth.invoice.service.impl.CustomUserDetailsService;
 
 @Repository
 public class UserRepositoryJdbc implements UserRepository {
@@ -55,6 +57,14 @@ public class UserRepositoryJdbc implements UserRepository {
 			INSERT INTO invoice.verify_mfa (user_id, mfa_code, expiration_date)
 			VALUES (:userId, :mfaCode, :expirationDate) 
 			""";
+	
+	private static final String SELECT_USER_BY_MFA_CODE_QUERY = """
+			SELECT u.*, mfa.* FROM invoice.app_user u 
+			INNER JOIN invoice.verify_mfa mfa 
+			ON u.user_id = mfa.user_id 
+			WHERE u.email = :email AND mfa.mfa_code = :code
+			""";
+	
 	
 	private Logger logger = LoggerFactory.getLogger(UserRepository.class);
 	
@@ -158,14 +168,37 @@ public class UserRepositoryJdbc implements UserRepository {
 	}
 	
 	@Override
-	public void addMfaVerifyCode(VerifyData verifyData) {
+	public void addVerifyMfaCode(VerifyData verifyData) {
 		try {
-			jdbcTmpl.update(DELETE_VERIFY_MFA_QUERY, 
-					Map.of("userId", verifyData.getUserId()));
+			deteleMfaCodeByUserId(verifyData.getUserId());
 			jdbcTmpl.update(INSERT_VERIFY_MFA_QUERY, Map.of(
 					"userId", verifyData.getUserId(),
 					"mfaCode", verifyData.getVerifyStr(),
 					"expirationDate", verifyData.getVerifyDate() ));
+		} catch(Exception ex) {
+			logger.error(ex.getMessage());
+			throw new ApiException("An error occured. Pleas try again");
+		}
+	}
+	
+	@Override
+	public UserVerify verifyMfaCode(String email, String code) {
+		try {
+			return jdbcTmpl.queryForObject(SELECT_USER_BY_MFA_CODE_QUERY, 
+					Map.of("email", email, "code", code),
+					new UserVerifyRowMapper());
+		} catch(EmptyResultDataAccessException ex) {
+			throw new ApiException("No valid code for user email: " + email);
+		} catch(Exception ex) {
+			logger.error(ex.getMessage());
+			throw new ApiException("An error occured. Pleas try again");
+		}
+	}
+	
+	@Override
+	public void deteleMfaCodeByUserId(long userId) {
+		try {
+			jdbcTmpl.update(DELETE_VERIFY_MFA_QUERY, Map.of("userId", userId));
 		} catch(Exception ex) {
 			logger.error(ex.getMessage());
 			throw new ApiException("An error occured. Pleas try again");

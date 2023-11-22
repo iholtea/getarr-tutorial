@@ -101,10 +101,11 @@ CREATE TABLE IF NOT EXISTS verify_mfa (
 
 insert into app_user(first_name, last_name, email, password, enabled, use_mfa) 
 values ('pop', 'popescu', 'ppopescu@gmail.com', 
-	'$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true, false);
+	'$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true, true);
 
-insert into app_user(first_name, last_name, email, password, enabled) 
-values ('gigi', 'gigescu', 'ggicescu@outlook.com', '$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true);
+insert into app_user(first_name, last_name, email, password, enabled, use_mfa) 
+values ('gigi', 'gigescu', 'ggicescu@outlook.com', 
+	'$2a$10$nb9mQwVv8u41V61OIe0ovue3vtuP/nL6TWpMhmQTb.LzJamC8.VrO', true, false);
 
 insert into user_event(user_id, event_type, description)
 values (1, 'LOGIN_SUCCESS', 'login from ip 10.0.0.10 using chrome');

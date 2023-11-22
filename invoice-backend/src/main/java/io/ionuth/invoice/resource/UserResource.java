@@ -3,11 +3,14 @@ package io.ionuth.invoice.resource;
 import java.net.URI;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,11 +61,6 @@ public class UserResource {
 		}
 	}
 	
-	@GetMapping("/login")
-	public ResponseEntity<String> loginGet() {
-		return ResponseEntity.ok("get works");
-	}
-	
 	@PostMapping("/register")
 	public ResponseEntity<AppUser> saveUser(@RequestBody @Valid AppUser appUser) {
 		userService.createUser(appUser);
@@ -70,6 +68,23 @@ public class UserResource {
 		String fullPath = ServletUriComponentsBuilder.fromCurrentContextPath().path(relPath).toUriString();
 		return ResponseEntity.created(URI.create(fullPath)).body(appUser);
 	}
+	
+	// TODO is is safe to send it in the URL ? is this encrypted with https ?
+	// or we should sent it as post ?
+	@GetMapping("/verify/code/{email}/{code}")
+	public ResponseEntity<?> verifyCode( @PathVariable("email") String email,
+			@PathVariable("code") String code) {
+		
+		AppUser appUser = userService.verifyCode(email, code);
+		// TODO check exceptions or verify against null
+		if( appUser != null ) {
+			return sendResponse(appUser);
+		} else {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body("Code could not be verified. Please try again");
+		}
+	}
+	
 	
 	private ResponseEntity<?> sendResponse(AppUser appUser) {
 		UserPrincipal userPrincipal = getUserPrincipal(appUser);
@@ -82,8 +97,8 @@ public class UserResource {
 	}
 
 	private ResponseEntity<?> sendVerificationCode(AppUser appUser) {
-		userService.sendVerificationCode(appUser);
-		return ResponseEntity.ok("verification code sent");
+		String verificationCode = userService.sendVerificationCode(appUser);
+		return ResponseEntity.ok("verification code sent: " + verificationCode);
 	}
 	
 	private UserPrincipal getUserPrincipal(AppUser appUser) {

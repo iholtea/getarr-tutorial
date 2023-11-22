@@ -20,7 +20,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import io.ionuth.invoice.handler.CustomAccessDeniedHandler;
 import io.ionuth.invoice.handler.CustomAuthenticationEntryPoint;
-import io.ionuth.invoice.service.imp.CustomUserDetailsService;
+import io.ionuth.invoice.service.impl.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +31,7 @@ public class WebSecurityConfig {
 			AntPathRequestMatcher.antMatcher("/error/**"),
 			AntPathRequestMatcher.antMatcher("/api/v1/users/login/**"),
 			AntPathRequestMatcher.antMatcher("/api/v1/users/register/**"),
+			AntPathRequestMatcher.antMatcher("/api/v1/users/verify/code/**"),
 			AntPathRequestMatcher.antMatcher("/api/v1/test/login/**")
 	};
 	

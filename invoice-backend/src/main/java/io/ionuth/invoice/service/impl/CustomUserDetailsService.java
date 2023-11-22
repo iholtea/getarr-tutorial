@@ -1,4 +1,4 @@
-package io.ionuth.invoice.service.imp;
+package io.ionuth.invoice.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

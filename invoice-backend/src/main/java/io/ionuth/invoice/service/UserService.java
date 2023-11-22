@@ -8,5 +8,7 @@ public interface UserService {
 	
 	AppUser getUserByEmail(String email);
 	
-	void sendVerificationCode(AppUser user);
+	String sendVerificationCode(AppUser user);
+	
+	AppUser verifyCode(String email, String code);
 }

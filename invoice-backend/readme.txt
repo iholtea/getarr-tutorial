@@ -191,7 +191,22 @@ Note on error on cycles in dependency injection
 	As a last resort, it may be possible to break the cycle automatically 
 	by setting spring.main.allow-circular-references to true.
 		
+
+TODOs
+	
+	1.	Create custom exceptions to control the flow between
+		data repository layer and service layer.
+		jdbcTmpl.queryForObject seems to throw EmptyResultDataAccessException
+		if data not found. Create a DbDataNotFound exception to re-throw to service layer
+	
+	2.	Do not have any application logic into the data repository implementation
+		Just do CRUD operations and move any logic to service layer
 		
+	3.	add User DTO as per DTO pattern so we do not operate is the db model AppUser
+		which contains the password.
+		To check - probably the AppUser is needed just for register/insert operation
+		( possibly for changing password also )		
+			
 	
 ///// Post request
 
