@@ -92,7 +92,7 @@ public class TokenProvider {
 	}
 
 	public Authentication getAuthentication(String email, 
-				List<GrantedAuthority> authorities,
+				List<? extends GrantedAuthority> authorities,
 				HttpServletRequest request) {
 		
 		UsernamePasswordAuthenticationToken userPassAuth = new UsernamePasswordAuthenticationToken(

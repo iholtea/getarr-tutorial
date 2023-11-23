@@ -15,9 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import io.ionuth.invoice.filter.CustomAuthorizationFilter;
 import io.ionuth.invoice.handler.CustomAccessDeniedHandler;
 import io.ionuth.invoice.handler.CustomAuthenticationEntryPoint;
 import io.ionuth.invoice.service.impl.CustomUserDetailsService;
@@ -32,18 +34,20 @@ public class WebSecurityConfig {
 			AntPathRequestMatcher.antMatcher("/api/v1/users/login/**"),
 			AntPathRequestMatcher.antMatcher("/api/v1/users/register/**"),
 			AntPathRequestMatcher.antMatcher("/api/v1/users/verify/code/**"),
-			AntPathRequestMatcher.antMatcher("/api/v1/test/login/**")
 	};
 	
 	private final CustomUserDetailsService userDetailService;
 	private final BCryptPasswordEncoder passEncoder;
+	private final CustomAuthorizationFilter customAuthorizationFilter;
 	
 	// constructor injection
 	public WebSecurityConfig(CustomUserDetailsService userDetailsService,
-			BCryptPasswordEncoder passEncoder) {
+			BCryptPasswordEncoder passEncoder,
+			CustomAuthorizationFilter customAuthorizationFilter) {
 		
 		this.userDetailService = userDetailsService;
 		this.passEncoder = passEncoder;
+		this.customAuthorizationFilter = customAuthorizationFilter;
 	}
 	
 	@Bean
@@ -81,6 +85,9 @@ public class WebSecurityConfig {
 			exHandle.authenticationEntryPoint(authenticationEntryPoint())
 					.accessDeniedHandler(accessDeniedHandler())
 		);
+		
+		// add our authorization filter
+		http.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
 	}
