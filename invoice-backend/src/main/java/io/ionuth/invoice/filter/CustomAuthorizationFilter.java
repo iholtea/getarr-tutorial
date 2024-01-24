@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.ionuth.invoice.exception.ExceptionUtil;
 import io.ionuth.invoice.jwt.TokenProvider;
 import io.ionuth.invoice.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -61,7 +62,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		
 		try {
 			String token = getToken(request);
 			String email = tokenProvider.getSubject(token, request);
@@ -71,12 +71,13 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 						token, authorities, request);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			} else {
+				logger.warn("Invalid token for user: {}", email);
 				SecurityContextHolder.clearContext();
 			}
 			filterChain.doFilter(request, response);
 		} catch(Exception ex) {
 			logger.error(ex.getMessage());
-			//processError(request, response, ex);
+			ExceptionUtil.processError(request, response, ex);
 		}
 	}
 	
